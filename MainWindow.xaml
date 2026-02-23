@@ -137,7 +137,7 @@
 
                 <Button Style="{StaticResource addButton}" Click="Forcast_Click">
                     <StackPanel Orientation="Horizontal">
-                        <Icons:PackIconMaterial Kind="GoogleAnalytics" VerticalAlignment="Center" Width="11" Height="11" Margin="0 1 8 0" Foreground="White"/>
+                        <Icons:PackIconMaterial Kind="ChartBar" VerticalAlignment="Center" Width="11" Height="11" Margin="0 1 8 0" Foreground="White"/>
                         <TextBlock Text="Forcast"/>
                     </StackPanel>
                 </Button>
@@ -152,7 +152,6 @@
                     <RadioButton Content="Warehouses" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Warehouses_Checked"/>
                     <RadioButton Content="Inventory" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Inventory_Checked"/>
                     <RadioButton Content="Sales" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Sales_Checked"/>
-                    <RadioButton Content="Forecasts" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Forecasts_Checked"/>
                 </StackPanel>
 
                 <!--Counter Title-->

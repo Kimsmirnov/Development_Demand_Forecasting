@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Development_Demand_Forecasting.Model;
+using Google.GenAI;
+using Google.GenAI.Types;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,9 +17,6 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Development_Demand_Forecasting.Model;
-using Google.GenAI;
-using Google.GenAI.Types;
 
 namespace Development_Demand_Forecasting
 {
@@ -81,11 +82,6 @@ namespace Development_Demand_Forecasting
             accountsDataGrid.ItemsSource = context.SalesHistory.ToList();
         }
 
-        private void Forecasts_Checked(object sender, RoutedEventArgs e)
-        {
-            accountsDataGrid.ItemsSource = context.Forecasts.ToList();
-        }
-
         private void Minus_Click(object sender, RoutedEventArgs e)
         {
             this.WindowState = WindowState.Minimized;
@@ -142,30 +138,92 @@ namespace Development_Demand_Forecasting
         {
             try
             {
-                var client = new Client(apiKey: "AIzaSyCViXsOHkMg0aflhk7BX44NxqNkueFQy60"); ;
+                if (sender is Button btn)
+                {
+                    if (btn.Content is StackPanel sp)
+                    {
+                        foreach (var child in sp.Children)
+                        {
+                            if (child is TextBlock tb)
+                            {
+                                tb.Text = "In Progress";
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                var client = new Client(apiKey: "AIzaSyDJoY8MEsNAZmKYosSQekPh5qBcE0c5Al0");
+
+                var salesData = context.SalesHistory
+                    .AsNoTracking()
+                    .ToList();
+
+                var products = context.Products
+                    .AsNoTracking()
+                    .ToList();
+
+                var inventory = context.Inventory
+                    .AsNoTracking()
+                    .ToList();
+
+                var productDataList = salesData
+                    .GroupBy(s => s.ProductId)
+                    .Select(g =>
+                    {
+                        var productName = products.FirstOrDefault(p => p.ProductId == g.Key)?.Name ?? "Unknown";
+
+                        var monthlySales = g
+                            .GroupBy(s => new DateTime(s.Date.Year, s.Date.Month, 1))
+                            .Select(mg => mg.Sum(x => x.Quantity))
+                            .ToList();
+
+                        var currentStock = inventory.FirstOrDefault(i => i.ProductId == g.Key)?.QuantityOnHand ?? 0;
+
+                        return $"Data for Product {g.Key} ({productName}):\nMonthly sales: [{string.Join(",", monthlySales)}]\nCurrent stock: {currentStock}";
+                    })
+                    .ToList();
+
+                string dataString = string.Join("\n\n", productDataList);
+
+                string prompt = $@"
+            Forecast next month's demand for each product below.
+            Return ONLY valid JSON for each product.
+
+            {dataString}
+
+            Output format per product:
+            {{
+              ""ProductId"": number,
+              ""ProductName"": ""text"",
+              ""forecast"": number,
+              ""recommended_order"": number,
+              ""explanation"": ""text""
+            }}";
 
                 var response = await client.Models.GenerateContentAsync(
                     model: "gemini-3-flash-preview",
-                    contents: """
-                    Forecast next month's demand based on the data below.
-                    Return ONLY valid JSON.
-
-                    Data:
-                    Monthly sales: [120,135,150,170,165,180,210,205,190,200,240,260]
-                    Current stock: 300
-
-                    Output format:
-                    {
-                      "forecast": number,
-                      "recommended_order": number,
-                      "explanation": "text"
-                    }
-                    """
+                    contents: prompt
                 );
 
                 string result = response.Candidates[0].Content.Parts[0].Text;
 
                 MessageBox.Show(result, "Forecast Result", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                if (sender is Button btnReset)
+                {
+                    if (btnReset.Content is StackPanel spReset)
+                    {
+                        foreach (var child in spReset.Children)
+                        {
+                            if (child is TextBlock tb)
+                            {
+                                tb.Text = "Forcast";
+                                break;
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {

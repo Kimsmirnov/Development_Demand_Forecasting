@@ -4,7 +4,6 @@ namespace Development_Demand_Forecasting.Model
 {
     internal class AppContext : DbContext
     {
-        public DbSet<Forecasts> Forecasts { get; set; }
         public DbSet<Products> Products { get; set; }
         public DbSet<Warehouses> Warehouses { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
@@ -31,11 +30,6 @@ namespace Development_Demand_Forecasting.Model
 
             modelBuilder.Entity<Inventory>()
                 .HasKey(i => new { i.ProductId, i.WarehouseId });
-
-            modelBuilder.Entity<Forecasts>()
-                .HasOne(f => f.Product)
-                .WithMany()
-                .HasForeignKey(f => f.ProductId);
 
         }
     }
