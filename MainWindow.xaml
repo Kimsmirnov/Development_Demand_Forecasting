@@ -148,7 +148,7 @@
 
                 <!--Content-->
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 10 0 0">
-                    <RadioButton Content="Products" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Products_Checked"/>
+                    <RadioButton x:Name="productsRadioButton" Content="Products" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Products_Checked"/>
                     <RadioButton Content="Suppliers" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Suppliers_Checked"/>
                     <RadioButton Content="Warehouses" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Warehouses_Checked"/>
                     <RadioButton Content="Inventory" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Inventory_Checked"/>
@@ -165,7 +165,7 @@
                 Panel.ZIndex="1" Text="Search"
                Visibility="{Binding ElementName=searchBox,Path=Text.IsEmpty,Converter={StaticResource BoolTovis}}"/>
 
-                    <TextBox x:Name="searchBox" Style="{StaticResource TextBoxSearch}"/>
+                    <TextBox x:Name="searchBox" Style="{StaticResource TextBoxSearch}" TextChanged="searchBox_TextChanged"/>
 
                     <Icons:PackIconMaterial Kind="Magnify" Width="15" Height="15" VerticalAlignment="Center"
                         Margin="0 0 15 0" Foreground="#b0b9c6" HorizontalAlignment="Right"/>
@@ -191,7 +191,7 @@
           ColumnWidth="*" 
           RowEditEnding="accountsDataGrid_RowEditEnding" 
           IsReadOnly="False" 
-          CanUserAddRows="True">
+          CanUserAddRows="False">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Actions" Width="60">
                             <DataGridTemplateColumn.CellTemplate>

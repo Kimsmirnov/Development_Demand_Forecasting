@@ -4,6 +4,7 @@ using Google.GenAI.Types;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Development_Demand_Forecasting
 {
@@ -32,6 +34,7 @@ namespace Development_Demand_Forecasting
             context = new Development_Demand_Forecasting.Model.AppContext();
             context.Database.EnsureCreated();
 
+            productsRadioButton.IsChecked = true;
         }
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -94,14 +97,18 @@ namespace Development_Demand_Forecasting
         private void accountsDataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
             var propertyDescriptor = e.PropertyDescriptor as System.ComponentModel.PropertyDescriptor;
-            if (propertyDescriptor == null) return;
 
-            var entityType = context.Model.FindEntityType(propertyDescriptor.ComponentType);
+            if ((e.PropertyType.IsClass && e.PropertyType != typeof(string)) ||
+                typeof(System.Collections.IEnumerable).IsAssignableFrom(e.PropertyType) && e.PropertyType != typeof(string))
+            {
+                e.Cancel = true;
+                return;
+            }
 
+            var entityType = context.Model.FindEntityType(propertyDescriptor?.ComponentType);
             if (entityType != null)
             {
                 var primaryKey = entityType.FindPrimaryKey();
-
                 if (primaryKey != null && primaryKey.Properties.Any(p => p.Name == e.PropertyName))
                 {
                     if (e.PropertyType == typeof(int))
@@ -112,13 +119,7 @@ namespace Development_Demand_Forecasting
                     {
                         e.Column.IsReadOnly = true;
                     }
-
                 }
-            }
-
-            if (e.PropertyType.IsClass && e.PropertyType != typeof(string))
-            {
-                e.Cancel = true;
             }
 
             if (e.PropertyType == typeof(DateTime))
@@ -130,31 +131,31 @@ namespace Development_Demand_Forecasting
         private void Products_Checked(object sender, RoutedEventArgs e)
         {
             context.Products.Load();
-            accountsDataGrid.ItemsSource = context.Products.Local.ToObservableCollection();
+            SetCurrentTable(context.Products.Local.ToObservableCollection());
         }
 
         private void Suppliers_Checked(object sender, RoutedEventArgs e)
         {
             context.Suppliers.Load();
-            accountsDataGrid.ItemsSource = context.Suppliers.Local.ToObservableCollection();
+            SetCurrentTable(context.Suppliers.Local.ToObservableCollection());
         }
 
         private void Warehouses_Checked(object sender, RoutedEventArgs e)
         {
             context.Warehouses.Load();
-            accountsDataGrid.ItemsSource = context.Warehouses.Local.ToObservableCollection();
+            SetCurrentTable(context.Warehouses.Local.ToObservableCollection());
         }
 
         private void Inventory_Checked(object sender, RoutedEventArgs e)
         {
             context.Inventory.Load();
-            accountsDataGrid.ItemsSource = context.Inventory.Local.ToObservableCollection();
+            SetCurrentTable(context.Inventory.Local.ToObservableCollection());
         }
 
         private void Sales_Checked(object sender, RoutedEventArgs e)
         {
             context.SalesHistory.Load();
-            accountsDataGrid.ItemsSource = context.SalesHistory.Local.ToObservableCollection();
+            SetCurrentTable(context.SalesHistory.Local.ToObservableCollection());
         }
 
         private void Minus_Click(object sender, RoutedEventArgs e)
@@ -321,11 +322,6 @@ namespace Development_Demand_Forecasting
 
             var item = button.DataContext;
 
-            // Не удаляем пустую строку добавления
-            if (item == null ||
-                item == System.Windows.Data.CollectionView.NewItemPlaceholder)
-                return;
-
             var result = MessageBox.Show(
                 "Delete this record?\nAll related data will also be removed.",
                 "Confirm Delete",
@@ -341,7 +337,6 @@ namespace Development_Demand_Forecasting
 
                 await context.SaveChangesAsync();
 
-                // UI обновится автоматически через Local коллекцию
             }
             catch (DbUpdateException)
             {
@@ -359,6 +354,47 @@ namespace Development_Demand_Forecasting
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
+        }
+        
+        private IEnumerable<object> currentItems;
+        private System.Reflection.PropertyInfo[] currentProperties;
+
+        private void SetCurrentTable<T>(ObservableCollection<T> items)
+        {
+            currentItems = items.Cast<object>();
+            currentProperties = typeof(T).GetProperties()
+                .Where(p => !p.PropertyType.IsClass || p.PropertyType == typeof(string))
+                .ToArray();
+
+            accountsDataGrid.ItemsSource = currentItems;
+        }
+
+        private void searchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string filter = searchBox.Text.ToLower();
+
+            if (string.IsNullOrWhiteSpace(filter))
+            {
+                accountsDataGrid.ItemsSource = currentItems;
+                return;
+            }
+
+            var filtered = currentItems
+                .Where(item => currentProperties.Any(p =>
+                {
+                    var value = p.GetValue(item);
+                    if (value == null) return false;
+
+                    if (value is DateTime dt)
+                    {
+                        return dt.ToString("yyyy-MM-dd").Contains(filter);
+                    }
+
+                    return value.ToString().ToLower().Contains(filter);
+                }))
+                .ToList();
+
+            accountsDataGrid.ItemsSource = filtered;
         }
     }
 }
