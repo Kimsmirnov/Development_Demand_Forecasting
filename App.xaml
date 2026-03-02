@@ -76,13 +76,15 @@
             <Setter Property="Padding" Value="15 10" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="0 10" />
+            <Setter Property="Text" Value="Search..." />
+            <!-- Начальный текст -->
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="TextBoxBase">
+                    <ControlTemplate TargetType="TextBox">
                         <Border x:Name="border" CornerRadius="20" Background="{TemplateBinding Background}" SnapsToDevicePixels="True"
-                                BorderThickness="1" BorderBrush="#e0e6ed">
+                        BorderThickness="1" BorderBrush="#e0e6ed">
                             <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden"
-                                          VerticalScrollBarVisibility="Hidden" />
+                                  VerticalScrollBarVisibility="Hidden" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -91,6 +93,19 @@
 
                             <Trigger Property="IsKeyboardFocused" Value="True">
                                 <Setter Property="BorderBrush" Value="#d9d9d9" TargetName="border" />
+                            </Trigger>
+
+                            <!-- Событие для "placeholder" -->
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter Property="Foreground" Value="Black"/>
+                                <Setter Property="Text" Value=""/>
+                                <!-- Очистка текста при фокусе -->
+                            </Trigger>
+
+                            <Trigger Property="IsKeyboardFocused" Value="False">
+                                <Setter Property="Foreground" Value="#b0b9c6"/>
+                                <Setter Property="Text" Value="Search..."/>
+                                <!-- Восстановление текста если пусто -->
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
