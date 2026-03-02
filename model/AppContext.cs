@@ -17,20 +17,44 @@ namespace Development_Demand_Forecasting.Model
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configure relationships
+
             modelBuilder.Entity<Products>()
-                .HasOne(p => p.Supplier)
-                .WithMany()
-                .HasForeignKey(p => p.SupplierId);
+                .HasIndex(p => p.SupplierId);
+
+            modelBuilder.Entity<Inventory>()
+                .HasIndex(i => i.ProductId);
+
+            modelBuilder.Entity<Inventory>()
+                .HasIndex(i => i.WarehouseId);
 
             modelBuilder.Entity<SalesHistory>()
-                .HasOne(s => s.Product)
-                .WithMany()
-                .HasForeignKey(s => s.ProductId);
-
+                .HasIndex(s => new { s.ProductId, s.Date });
             modelBuilder.Entity<Inventory>()
                 .HasKey(i => new { i.ProductId, i.WarehouseId });
 
+            modelBuilder.Entity<Products>()
+                .HasOne(p => p.Supplier)
+                .WithMany(s => s.Products)
+                .HasForeignKey(p => p.SupplierId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SalesHistory>()
+                .HasOne(s => s.Product)
+                .WithMany(p => p.SalesHistory)
+                .HasForeignKey(s => s.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Inventory>()
+                .HasOne(i => i.Product)
+                .WithMany(p => p.Inventory)
+                .HasForeignKey(i => i.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Inventory>()
+                .HasOne(i => i.Warehouse)
+                .WithMany(w => w.Inventory)
+                .HasForeignKey(i => i.WarehouseId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

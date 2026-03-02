@@ -10,14 +10,6 @@ namespace Development_Demand_Forecasting.Model
         public string Name { get; set; }
         public string Location { get; set; }
 
-        public Warehouses() { }
-
-        public Warehouses(int warehouseId, string name, string location)
-        {
-            this.WarehouseId = warehouseId;
-            this.Name = name;
-            this.Location = location;
-
-        }
+        public ICollection<Inventory> Inventory { get; set; }
     }
 }
