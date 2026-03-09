@@ -29,6 +29,7 @@ namespace Development_Demand_Forecasting.Model
 
             modelBuilder.Entity<SalesHistory>()
                 .HasIndex(s => new { s.ProductId, s.Date });
+
             modelBuilder.Entity<Inventory>()
                 .HasKey(i => new { i.ProductId, i.WarehouseId });
 

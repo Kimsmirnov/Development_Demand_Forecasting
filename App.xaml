@@ -31,13 +31,16 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="menuButton" TargetType="RadioButton">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="White" />
+        <Style x:Key="BaseMenuStyle" TargetType="Control">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Margin" Value="15 3"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style x:Key="menuButton" TargetType="RadioButton" BasedOn="{StaticResource BaseMenuStyle}">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-            <Setter Property="Height" Value="35" />
-            <Setter Property="Margin" Value="15 3" />
-            <Setter Property="FontSize" Value="13" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
@@ -50,13 +53,29 @@
 
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="LightCoral" />
-                    <Setter Property="Foreground" Value="#ffffff" />
+                    <Setter Property="Background" Value="LightCoral"/>
                 </Trigger>
 
                 <Trigger Property="IsChecked" Value="True">
-                    <Setter Property="Background" Value="LightCoral" />
-                    <Setter Property="Foreground" Value="#ffffff" />
+                    <Setter Property="Background" Value="LightCoral"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="menuButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseMenuStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="7">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="LightCoral"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -76,15 +95,13 @@
             <Setter Property="Padding" Value="15 10" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="0 10" />
-            <Setter Property="Text" Value="Search..." />
-            <!-- Начальный текст -->
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
+                    <ControlTemplate TargetType="TextBoxBase">
                         <Border x:Name="border" CornerRadius="20" Background="{TemplateBinding Background}" SnapsToDevicePixels="True"
-                        BorderThickness="1" BorderBrush="#e0e6ed">
+                                BorderThickness="1" BorderBrush="#e0e6ed">
                             <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden"
-                                  VerticalScrollBarVisibility="Hidden" />
+                                          VerticalScrollBarVisibility="Hidden" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -93,19 +110,6 @@
 
                             <Trigger Property="IsKeyboardFocused" Value="True">
                                 <Setter Property="BorderBrush" Value="#d9d9d9" TargetName="border" />
-                            </Trigger>
-
-                            <!-- Событие для "placeholder" -->
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter Property="Foreground" Value="Black"/>
-                                <Setter Property="Text" Value=""/>
-                                <!-- Очистка текста при фокусе -->
-                            </Trigger>
-
-                            <Trigger Property="IsKeyboardFocused" Value="False">
-                                <Setter Property="Foreground" Value="#b0b9c6"/>
-                                <Setter Property="Text" Value="Search..."/>
-                                <!-- Восстановление текста если пусто -->
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

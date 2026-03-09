@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Development_Demand_Forecasting.Model
 {
@@ -9,10 +10,12 @@ namespace Development_Demand_Forecasting.Model
 
         public string Name { get; set; }
         public decimal UnitPrice { get; set; }
-
         public int SupplierId { get; set; }
 
         public Suppliers Supplier { get; set; }
+
+        [NotMapped]
+        public string SupplierName => Supplier?.Name;
 
         public ICollection<SalesHistory> SalesHistory { get; set; }
         public ICollection<Inventory> Inventory { get; set; }

@@ -1,10 +1,12 @@
 ﻿using Development_Demand_Forecasting.Model;
+using Development_Demand_Forecasting.Services;
 using Google.GenAI;
 using Google.GenAI.Types;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.DirectoryServices.ActiveDirectory;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -35,6 +37,17 @@ namespace Development_Demand_Forecasting
             context.Database.EnsureCreated();
 
             productsRadioButton.IsChecked = true;
+        }
+
+        private void searchBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            placeholderTextBlock.Visibility = Visibility.Collapsed;
+        }
+
+        private void searchBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(searchBox.Text))
+                placeholderTextBlock.Visibility = Visibility.Visible;
         }
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -112,6 +125,22 @@ namespace Development_Demand_Forecasting
 
         private void accountsDataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
+            if (e.PropertyName == "SupplierId")
+            {
+                e.Cancel = true;
+                return;
+            }
+            if (e.PropertyName == "ProductId" || e.PropertyName == "WarehouseId")
+            {
+                e.Cancel = true;
+                return;
+            }
+            if (e.PropertyName == "ProductId")
+            {
+                e.Cancel = true;
+                return;
+            }
+
             var propertyDescriptor = e.PropertyDescriptor as System.ComponentModel.PropertyDescriptor;
 
             if ((e.PropertyType.IsClass && e.PropertyType != typeof(string)) ||
@@ -146,7 +175,7 @@ namespace Development_Demand_Forecasting
 
         private void Products_Checked(object sender, RoutedEventArgs e)
         {
-            context.Products.Load();
+            context.Products.Include(p => p.Supplier).Load();
             SetCurrentTable(context.Products.Local.ToObservableCollection());
         }
 
@@ -164,7 +193,7 @@ namespace Development_Demand_Forecasting
 
         private void Inventory_Checked(object sender, RoutedEventArgs e)
         {
-            context.Inventory.Load();
+            context.Inventory.Include(p => p.Warehouse).Load();
             SetCurrentTable(context.Inventory.Local.ToObservableCollection());
         }
 
@@ -245,7 +274,7 @@ namespace Development_Demand_Forecasting
                     }
                 }
 
-                var client = new Client(apiKey: "AIzaSyDpz43xDCKmE2Q3k7KQGaMy8r2k7UsuiB4");
+                var client = new Client(apiKey: "");
 
                 var salesData = context.SalesHistory
                     .ToList();
@@ -350,12 +379,22 @@ namespace Development_Demand_Forecasting
             try
             {
                 context.Remove(item);
-
                 await context.SaveChangesAsync();
 
+                var updatedList = currentItems.ToList();
+                if (updatedList.Contains(item))
+                {
+                    updatedList.Remove(item);
+                    currentItems = updatedList;
+                }
+                searchBox_TextChanged(searchBox, null);
+
+                MessageBox.Show("Record deleted successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (DbUpdateException)
             {
+                context.Entry(item).Reload();
+
                 MessageBox.Show(
                     "Cannot delete this record.\nIt is used in other data.",
                     "Delete Error",
@@ -371,13 +410,21 @@ namespace Development_Demand_Forecasting
                     MessageBoxImage.Error);
             }
         }
-        
+
         private IEnumerable<object> currentItems;
         private System.Reflection.PropertyInfo[] currentProperties;
 
         private void SetCurrentTable<T>(ObservableCollection<T> items)
         {
-            currentItems = items.Cast<object>();
+            if (items == null)
+            {
+                currentItems = new List<object>();
+                currentProperties = Array.Empty<System.Reflection.PropertyInfo>();
+                accountsDataGrid.ItemsSource = currentItems;
+                return;
+            }
+
+            currentItems = items.Cast<object>().ToList();
             currentProperties = typeof(T).GetProperties()
                 .Where(p => !p.PropertyType.IsClass || p.PropertyType == typeof(string))
                 .ToArray();
@@ -387,6 +434,9 @@ namespace Development_Demand_Forecasting
 
         private void searchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            if (currentItems == null || currentProperties == null)
+                return;
+
             string filter = searchBox.Text.ToLower();
 
             if (string.IsNullOrWhiteSpace(filter))
@@ -402,15 +452,26 @@ namespace Development_Demand_Forecasting
                     if (value == null) return false;
 
                     if (value is DateTime dt)
-                    {
                         return dt.ToString("yyyy-MM-dd").Contains(filter);
-                    }
 
                     return value.ToString().ToLower().Contains(filter);
                 }))
                 .ToList();
 
             accountsDataGrid.ItemsSource = filtered;
+        }
+
+        private void RadioButton_Checked_1(object sender, RoutedEventArgs e)
+        {
+            Forecast forcastWindow = new Forecast();
+            forcastWindow.Show();
+            this.Close();
+        }
+
+        private void export_Click(object sender, RoutedEventArgs e)
+        {
+            var forecastList = ForecastDataService.LatestForecast;
+            ExcelExportService.ExportForecast(forecastList);
         }
     }
 }

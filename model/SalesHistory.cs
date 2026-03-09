@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Development_Demand_Forecasting.Model
 {
@@ -14,5 +15,8 @@ namespace Development_Demand_Forecasting.Model
 
         public DateTime Date { get; set; }
         public int Quantity { get; set; }
+
+        [NotMapped]
+        public string ProductName => Product?.Name;
     }
 }

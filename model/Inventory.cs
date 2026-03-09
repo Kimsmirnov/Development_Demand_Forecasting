@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Development_Demand_Forecasting.Model
 {
@@ -11,5 +12,11 @@ namespace Development_Demand_Forecasting.Model
         public Warehouses Warehouse { get; set; }
 
         public int QuantityOnHand { get; set; }
+
+        [NotMapped]
+        public string ProductName => Product?.Name;
+
+        [NotMapped]
+        public string WarehouseName => Warehouse?.Name;
     }
 }
