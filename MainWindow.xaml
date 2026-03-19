@@ -81,27 +81,6 @@
                                     <TextBlock Text="AI Forcast"/>
                                 </StackPanel>
                             </RadioButton>
-
-                            <Button Style="{StaticResource menuButtonStyle}" Click="export_Click">
-                                <StackPanel Orientation="Horizontal">
-                                    <Icons:PackIconMaterial Kind="FileDocumentEdit" Style="{StaticResource menuButtonIcon}"/>
-                                    <TextBlock Text="Export"/>
-                                </StackPanel>
-                            </Button>
-
-                            <RadioButton Style="{StaticResource menuButton}" GroupName="Menu">
-                                <StackPanel Orientation="Horizontal">
-                                    <Icons:PackIconMaterial Kind="Cash" Style="{StaticResource menuButtonIcon}"/>
-                                    <TextBlock Text="Wallet"/>
-                                </StackPanel>
-                            </RadioButton>
-
-                            <RadioButton Style="{StaticResource menuButton}" GroupName="Menu">
-                                <StackPanel Orientation="Horizontal">
-                                    <Icons:PackIconMaterial Kind="ForumOutline" Style="{StaticResource menuButtonIcon}"/>
-                                    <TextBlock Text="Messages"/>
-                                </StackPanel>
-                            </RadioButton>
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -136,10 +115,17 @@
                 <TextBlock Text="Main Board" Grid.Row="1" FontSize="32" FontWeight="SemiBold" Margin="0 20 0 0"
                            HorizontalAlignment="Left" Foreground="#121518" Height="43" Grid.RowSpan="2" VerticalAlignment="Top"/>
 
-                <Button Style="{StaticResource addButton}" Click="Forcast_Click">
+                <Button Style="{StaticResource addButton}" Click="Add_Click">
                     <StackPanel Orientation="Horizontal">
-                        <Icons:PackIconMaterial Kind="ChartBar" VerticalAlignment="Center" Width="11" Height="11" Margin="0 1 8 0" Foreground="White"/>
-                        <TextBlock Text="Forcast"/>
+                        <Icons:PackIconMaterial Kind="Plus" VerticalAlignment="Center" Width="11" Height="11" Margin="0 1 8 0" Foreground="White"/>
+                        <TextBlock Text="Add Item"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource addButton}" Click="export_Click" Margin="0,19,155,1" Grid.Row="1">
+                    <StackPanel Orientation="Horizontal">
+                        <Icons:PackIconMaterial Kind="FileDocumentEdit" VerticalAlignment="Center" Width="11" Height="11" Margin="0 1 8 0" Foreground="White"/>
+                        <TextBlock Text="Export"/>
                     </StackPanel>
                 </Button>
 
@@ -149,10 +135,10 @@
                 <!--Content-->
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 10 0 0">
                     <RadioButton x:Name="productsRadioButton" Content="Products" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Products_Checked"/>
-                    <RadioButton Content="Suppliers" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Suppliers_Checked"/>
-                    <RadioButton Content="Warehouses" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Warehouses_Checked"/>
-                    <RadioButton Content="Inventory" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Inventory_Checked"/>
-                    <RadioButton Content="Sales" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Sales_Checked"/>
+                    <RadioButton x:Name="suppliersRadioButton" Content="Suppliers" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Suppliers_Checked"/>
+                    <RadioButton x:Name="warehousesRadioButton" Content="Warehouses" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Warehouses_Checked"/>
+                    <RadioButton x:Name="inventoryRadioButton"  Content="Inventory" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Inventory_Checked"/>
+                    <RadioButton x:Name="salesRadioButton" Content="Sales" Style="{StaticResource tabButton}" GroupName="Tabs" Checked="Sales_Checked"/>
                 </StackPanel>
 
                 <!--Counter Title-->

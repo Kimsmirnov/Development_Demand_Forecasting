@@ -81,27 +81,6 @@
                                     <TextBlock Text="AI Forcast"/>
                                 </StackPanel>
                             </RadioButton>
-
-                            <Button Style="{StaticResource menuButtonStyle}" Click="export_Click">
-                                <StackPanel Orientation="Horizontal">
-                                    <Icons:PackIconMaterial Kind="FileDocumentEdit" Style="{StaticResource menuButtonIcon}"/>
-                                    <TextBlock Text="Export"/>
-                                </StackPanel>
-                            </Button>
-
-                            <RadioButton Style="{StaticResource menuButton}" GroupName="Menu">
-                                <StackPanel Orientation="Horizontal">
-                                    <Icons:PackIconMaterial Kind="Cash" Style="{StaticResource menuButtonIcon}"/>
-                                    <TextBlock Text="Wallet"/>
-                                </StackPanel>
-                            </RadioButton>
-
-                            <RadioButton Style="{StaticResource menuButton}" GroupName="Menu">
-                                <StackPanel Orientation="Horizontal">
-                                    <Icons:PackIconMaterial Kind="ForumOutline" Style="{StaticResource menuButtonIcon}"/>
-                                    <TextBlock Text="Messages"/>
-                                </StackPanel>
-                            </RadioButton>
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -140,6 +119,13 @@
                     <StackPanel Orientation="Horizontal">
                         <Icons:PackIconMaterial Kind="ChartBar" VerticalAlignment="Center" Width="11" Height="11" Margin="0 1 8 0" Foreground="White"/>
                         <TextBlock Text="Forcast"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource addButton}" Click="export_Click" Margin="0,19,155,1" Grid.Row="1">
+                    <StackPanel Orientation="Horizontal">
+                        <Icons:PackIconMaterial Kind="FileDocumentEdit" VerticalAlignment="Center" Width="11" Height="11" Margin="0 1 8 0" Foreground="White"/>
+                        <TextBlock Text="Export"/>
                     </StackPanel>
                 </Button>
 

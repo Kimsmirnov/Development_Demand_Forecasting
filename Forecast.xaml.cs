@@ -291,7 +291,7 @@ namespace Development_Demand_Forecasting
                     }
                 }
 
-                var client = new Client(apiKey: "AIzaSyCzzK_7e2-CmAd92I5N5X8dL96grYDLqA4");
+                var client = new Client(apiKey: "AIzaSyAWU3Nyn8OmYKyovQx2BHUAxapV-RBuuHc");
 
                 var salesData = context.SalesHistory
                     .ToList();

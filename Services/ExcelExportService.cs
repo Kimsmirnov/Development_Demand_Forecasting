@@ -1,5 +1,6 @@
 ﻿using ClosedXML.Excel;
 using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -8,53 +9,84 @@ namespace Development_Demand_Forecasting.Services
 {
     public static class ExcelExportService
     {
-        public static void ExportForecast(List<ForecastResult> forecastList)
+        public static void ExportData(IEnumerable<object> data, string defaultFileName = "ExportData.xlsx")
         {
-            if (forecastList == null || !forecastList.Any())
+            if (data == null || !data.Any())
             {
-                MessageBox.Show("No data to export.");
+                MessageBox.Show("No data to export.", "Export", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
             SaveFileDialog dialog = new SaveFileDialog
             {
                 Filter = "Excel Workbook (*.xlsx)|*.xlsx",
-                FileName = "ForecastResults.xlsx"
+                FileName = defaultFileName
             };
 
             if (dialog.ShowDialog() != true)
                 return;
 
-            using (var workbook = new XLWorkbook())
+            try
             {
-                var worksheet = workbook.Worksheets.Add("Forecast");
-
-                worksheet.Cell(1, 1).Value = "Product ID";
-                worksheet.Cell(1, 2).Value = "Product Name";
-                worksheet.Cell(1, 3).Value = "Current Stock";
-                worksheet.Cell(1, 4).Value = "Predicted Demand";
-                worksheet.Cell(1, 5).Value = "Suggested Order";
-
-                for (int i = 0; i < forecastList.Count; i++)
+                using (var workbook = new XLWorkbook())
                 {
-                    var item = forecastList[i];
+                    var itemType = data.First().GetType();
+                    string sheetName = itemType.Name.Length > 31 ? itemType.Name.Substring(0, 31) : itemType.Name;
+                    var worksheet = workbook.Worksheets.Add(sheetName);
 
-                    worksheet.Cell(i + 2, 1).Value = item.ProductId;
-                    worksheet.Cell(i + 2, 2).Value = item.ProductName;
-                    worksheet.Cell(i + 2, 3).Value = item.CurrentStock;
-                    worksheet.Cell(i + 2, 4).Value = item.AIPredictedDemand;
-                    worksheet.Cell(i + 2, 5).Value = item.SuggestedOrderQty;
+                    var properties = itemType.GetProperties()
+                        .Where(p => p.PropertyType.IsValueType || p.PropertyType == typeof(string))
+                        .ToList();
+
+                    for (int i = 0; i < properties.Count; i++)
+                    {
+                        worksheet.Cell(1, i + 1).Value = properties[i].Name;
+                    }
+
+                    int rowIndex = 2;
+                    foreach (var item in data)
+                    {
+                        for (int colIndex = 0; colIndex < properties.Count; colIndex++)
+                        {
+                            var val = properties[colIndex].GetValue(item);
+                            if (val != null)
+                            {
+                                if (val is DateTime dt)
+                                    worksheet.Cell(rowIndex, colIndex + 1).Value = dt.ToString("yyyy-MM-dd");
+                                else if (val is int || val is decimal || val is double || val is float || val is short || val is long)
+                                    worksheet.Cell(rowIndex, colIndex + 1).Value = Convert.ToDouble(val);
+                                else
+                                    worksheet.Cell(rowIndex, colIndex + 1).Value = val.ToString();
+                            }
+                        }
+                        rowIndex++;
+                    }
+
+                    worksheet.Columns().AdjustToContents();
+
+                    var table = worksheet.Range(1, 1, rowIndex - 1, properties.Count).CreateTable();
+                    table.Theme = XLTableTheme.TableStyleMedium2;
+
+                    workbook.SaveAs(dialog.FileName);
                 }
 
-                worksheet.Columns().AdjustToContents();
+                MessageBox.Show("Data exported successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error exporting data:\n{ex.Message}", "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
-                var table = worksheet.Range(1, 1, forecastList.Count + 1, 5).CreateTable();
-                table.Theme = XLTableTheme.TableStyleMedium2;
-
-                workbook.SaveAs(dialog.FileName);
+        public static void ExportForecast(List<ForecastResult> forecastList)
+        {
+            if (forecastList == null || !forecastList.Any())
+            {
+                MessageBox.Show("No data to export.", "Export", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
             }
 
-            MessageBox.Show("Excel exported successfully.");
+            ExportData(forecastList.Cast<object>(), "ForecastResults.xlsx");
         }
     }
 }

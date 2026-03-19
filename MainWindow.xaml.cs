@@ -232,7 +232,6 @@ namespace Development_Demand_Forecasting
             double from = isPanelOpen ? 0 : -SidePanel.ActualWidth;
             double to = isPanelOpen ? -SidePanel.ActualWidth : 0;
 
-            // Animate SidePanel sliding
             var animation = new DoubleAnimation
             {
                 From = from,
@@ -245,7 +244,6 @@ namespace Development_Demand_Forecasting
             };
             SidePanelTransform.BeginAnimation(TranslateTransform.XProperty, animation);
 
-            // Animate MainBoard expanding
             Storyboard mainBoardStoryboard = isPanelOpen
                 ? (Storyboard)FindResource("ExpandMainBoardStoryboard")
                 : (Storyboard)FindResource("CollapseMainBoardStoryboard");
@@ -470,8 +468,54 @@ namespace Development_Demand_Forecasting
 
         private void export_Click(object sender, RoutedEventArgs e)
         {
-            var forecastList = ForecastDataService.LatestForecast;
-            ExcelExportService.ExportForecast(forecastList);
+            var itemsToExport = accountsDataGrid.ItemsSource?.Cast<object>();
+
+            if (itemsToExport == null || !itemsToExport.Any())
+            {
+                MessageBox.Show("There is no data to export in the current table.", "Export", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var firstItemType = itemsToExport.First().GetType();
+            string defaultFileName = $"{firstItemType.Name}_Export.xlsx";
+
+            ExcelExportService.ExportData(itemsToExport, defaultFileName);
+        }
+
+        private void Add_Click(object sender, RoutedEventArgs e)
+        {
+            bool? result = false;
+
+            if (productsRadioButton.IsChecked == true)
+            {
+                AddItem addProductWindow = new AddItem("Product");
+                result = addProductWindow.ShowDialog();
+                if (result == true) Products_Checked(null, null);
+            }
+            else if (suppliersRadioButton.IsChecked == true)
+            {
+                AddItem addSupplierWindow = new AddItem("Supplier");
+                result = addSupplierWindow.ShowDialog();
+                if (result == true) Suppliers_Checked(null, null);
+            }
+            else if (warehousesRadioButton.IsChecked == true)
+            {
+                AddItem addWarehouseWindow = new AddItem("Warehouse");
+                result = addWarehouseWindow.ShowDialog();
+                if (result == true) Warehouses_Checked(null, null);
+            }
+            else if (inventoryRadioButton.IsChecked == true)
+            {
+                AddItem addInventoryWindow = new AddItem("Inventory");
+                result = addInventoryWindow.ShowDialog();
+                if (result == true) Inventory_Checked(null, null);
+            }
+            else if (salesRadioButton.IsChecked == true)
+            {
+                AddItem addSalesWindow = new AddItem("SalesHistory");
+                result = addSalesWindow.ShowDialog();
+                if (result == true) Sales_Checked(null, null);
+            }
         }
     }
 }
